@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 12:57:15 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/06 13:51:59 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/06 15:37:50 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,4 +47,33 @@ void	free_tab(char **tab)
 		i++;
 	}
 	free(tab);
+}
+
+char	*get_path(char *cmd, char **envp)
+{
+	char	**path;
+	char	*result;
+	char	*temp;
+	int		i;
+
+	i = 0;
+	while (envp[i] && ft_strncmp("PATH=", envp[i], 5) != 0)
+		i++;
+	if (!envp[i])
+		return (NULL);
+	path = ft_split(envp[i] + 5, ':');
+	i = 0;
+	while (path[i])
+	{
+		temp = ft_strjoin(path[i], "/");
+		result = ft_strjoin(temp, cmd);
+		free(temp);
+		if (access(result, F_OK) == 0)
+		{
+			free_tab(path);
+			return (result);
+		}
+		(free(result), i++);
+	}
+	return (free_tab(path), NULL);
 }

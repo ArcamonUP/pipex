@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 17:23:58 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/06 15:23:16 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/06 17:10:35 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,35 +16,6 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-
-char	*get_path(char *cmd, char **envp)
-{
-	char	**path;
-	char	*result;
-	char	*temp;
-	int		i;
-
-	i = 0;
-	while (envp[i] && ft_strncmp("PATH=", envp[i], 5) != 0)
-		i++;
-	if (!envp[i])
-		return (NULL);
-	path = ft_split(envp[i] + 5, ':');
-	i = 0;
-	while (path[i])
-	{
-		temp = ft_strjoin(path[i], "/");
-		result = ft_strjoin(temp, cmd);
-		free(temp);
-		if (access(result, F_OK) == 0)
-		{
-			free_tab(path);
-			return (result);
-		}
-		(free(result), i++);
-	}
-	return (free_tab(path), NULL);
-}
 
 int	exec(char *cmd, char **envp)
 {
@@ -115,6 +86,23 @@ void	last_exec(int fd[2], char **cmd, char **envp)
 	free_tab(cmd);
 }
 
+void	do_cmd(int i, char **cmd, char **envp, int fd[2])
+{
+	while (cmd[i + 1])
+	{
+		if (!pre_exec(cmd[i++], envp))
+		{
+			free_tab(cmd);
+			error("Execution failed.\n");
+			break ;
+		}
+	}
+	last_exec(fd, cmd, envp);
+	if (i == 0)
+		close(fd[0]);
+	close(fd[1]);
+}
+
 int	main(int ac, char **av, char **envp)
 {
 	char	**cmd;
@@ -132,24 +120,12 @@ int	main(int ac, char **av, char **envp)
 	}
 	else
 	{
-		fd[0] = open(av[1], O_RDWR | O_TRUNC);
-		fd[1] = open(av[ac - 1], O_RDWR | O_TRUNC);
+		fd[0] = open(av[1], O_RDWR);
+		fd[1] = open(av[ac - 1], O_RDWR | O_TRUNC | O_CREAT, 0666);
 		if (fd[0] == -1 || fd[1] == -1)
 			return (end(cmd, fd, 0), 0);
 		dup2(fd[0], STDIN_FILENO);
 		i = 0;
 	}
-	while (cmd[i + 1])
-	{
-		if (!pre_exec(cmd[i++], envp))
-		{
-			free_tab(cmd);
-			error("Execution failed.\n");
-			break ;
-		}
-	}
-	last_exec(fd, cmd, envp);
-	if (ft_strncmp(av[1], "here_doc", 8) != 0)
-		close(fd[0]);
-	close(fd[1]);
+	do_cmd(i, cmd, envp, fd);
 }
