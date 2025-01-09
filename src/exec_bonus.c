@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 16:33:33 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/06 15:23:43 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/09 14:43:35 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,13 +41,13 @@ void	write_lines(int fd[2], char *limiter, char **cmd)
 	free_tab(cmd);
 }
 
-int	exec_bonus(char **cmd, int fc[2])
+int	exec_bonus(t_data data)
 {
 	char	*limiter;
 	__pid_t	p;
 	int		fd[2];
 
-	limiter = cmd[0];
+	limiter = data.cmd[0];
 	if (pipe(fd) == -1)
 		return (error("Execution failed.\n"), 0);
 	p = fork();
@@ -55,14 +55,14 @@ int	exec_bonus(char **cmd, int fc[2])
 		return (error("Execution failed.\n"), 0);
 	if (p == 0)
 	{
-		close(fc[1]);
-		write_lines(fd, limiter, cmd);
+		close(data.fd[1]);
+		write_lines(fd, limiter, data.cmd);
 	}
 	else
 	{
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		wait(NULL);
+		waitpid(p, NULL, 0);
 	}
 	close(fd[0]);
 	return (1);

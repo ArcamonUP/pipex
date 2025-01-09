@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 17:23:58 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/06 17:10:35 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/09 15:09:38 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,115 +17,118 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
-int	exec(char *cmd, char **envp)
+void	exec(char *cmd, t_data data, int fd[2], int i)
 {
 	char	**args;
 	char	*path;
 
 	args = ft_split(cmd, ' ');
-	path = get_path(args[0], envp);
+	path = get_path(args[0], data.envp);
 	if (!path)
 	{
+		free_tab(data.cmd);
+		if (i == 1)
+			error("Execution failed.\n");
 		free_tab(args);
-		return (0);
+		if (fd)
+			(close(fd[0]), close(fd[1]));
+		if (data.fd[0])
+			close(data.fd[0]);
+		close(data.fd[1]);
+		exit(EXIT_FAILURE);
 	}
-	execve(path, args, envp);
+	execve(path, args, data.envp);
 	free_tab(args);
 	free(path);
-	return (1);
+	exit(EXIT_FAILURE);
 }
 
-int	pre_exec(char *cmd, char **envp)
+void	pre_exec(char *cmd, t_data data)
 {
-	__pid_t	p;
+	pid_t	p;
 	int		fd[2];
 
 	if (pipe(fd) == -1)
-		return (0);
+		return ;
 	p = fork();
 	if (p == -1)
-		return (0);
+		return ;
 	if (p == 0)
 	{
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
-		return (exec(cmd, envp));
+		exec(cmd, data, fd, 0);
 	}
 	else
 	{
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		wait(NULL);
+		waitpid(p, NULL, 0);
 	}
 	close(fd[0]);
-	return (1);
+	return ;
 }
 
-void	last_exec(int fd[2], char **cmd, char **envp)
+int	last_exec(t_data data, int fd)
 {
-	int		p;
+	pid_t	p;
 	int		i;
 
+	dup2(fd, STDOUT_FILENO);
 	p = fork();
 	if (p == -1)
 	{
-		free_tab(cmd);
-		return (error("Failed to fork process\n"));
+		free_tab(data.cmd);
+		return (error("Execution failed."), 1);
 	}
 	i = 0;
-	while (cmd[i + 1])
+	while (data.cmd[i + 1])
 		i++;
 	if (p == 0)
-	{
-		dup2(fd[1], STDOUT_FILENO);
-		exec(cmd[i], envp);
-		error("Last execution failed.\n");
-		free_tab(cmd);
-	}
-	wait(NULL);
-	free_tab(cmd);
+		exec(data.cmd[i], data, NULL, 1);
+	waitpid(p, NULL, 0);
+	free_tab(data.cmd);
+	return (0);
 }
 
-void	do_cmd(int i, char **cmd, char **envp, int fd[2])
+int	do_cmd(t_data data)
 {
-	while (cmd[i + 1])
-	{
-		if (!pre_exec(cmd[i++], envp))
-		{
-			free_tab(cmd);
-			error("Execution failed.\n");
-			break ;
-		}
-	}
-	last_exec(fd, cmd, envp);
-	if (i == 0)
-		close(fd[0]);
-	close(fd[1]);
+	int	i;
+	int	y;
+
+	i = 0;
+	if (data.fd[0])
+		i = 1;
+	while (data.cmd[i + 1])
+		pre_exec(data.cmd[i++], data);
+	y = last_exec(data, data.fd[1]);
+	if (data.fd[0])
+		close(data.fd[0]);
+	close(data.fd[1]);
+	return (y);
 }
 
 int	main(int ac, char **av, char **envp)
 {
-	char	**cmd;
-	int		fd[2];
-	int		i;
+	t_data	data;
 
-	if (!init(ac, av, &cmd))
-		return (0);
+	data.envp = envp;
+	if (!init(ac, av, &data.cmd))
+		return (1);
 	if (ft_strncmp(av[1], "here_doc", 8) == 0)
 	{
-		fd[1] = open(av[ac - 1], O_RDWR | O_TRUNC);
-		if (fd[1] == -1 || !exec_bonus(cmd, fd))
-			return (end(cmd, fd, 1), 0);
-		i = 1;
+		data.fd[1] = open(av[ac - 1], O_RDWR | O_TRUNC);
+		data.fd[0] = 0;
+		if (data.fd[1] == -1 || !exec_bonus(data))
+			return (end(data, 1), 1);
 	}
 	else
 	{
-		fd[0] = open(av[1], O_RDWR);
-		fd[1] = open(av[ac - 1], O_RDWR | O_TRUNC | O_CREAT, 0666);
-		if (fd[0] == -1 || fd[1] == -1)
-			return (end(cmd, fd, 0), 0);
-		dup2(fd[0], STDIN_FILENO);
-		i = 0;
+		data.fd[0] = open(av[1], O_RDWR);
+		data.fd[1] = open(av[ac - 1], O_RDWR | O_TRUNC | O_CREAT, 0666);
+		if (data.fd[0] == -1 || data.fd[1] == -1)
+			return (end(data, 0), 1);
+		dup2(data.fd[0], STDIN_FILENO);
 	}
-	do_cmd(i, cmd, envp, fd);
+	return (do_cmd(data));
 }
