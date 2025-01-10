@@ -6,13 +6,14 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 12:57:15 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/09 14:44:13 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/10 15:49:40 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 #include "libft.h"
 #include "pipex.h"
 
@@ -75,4 +76,23 @@ char	*get_path(char *cmd, char **envp)
 		(free(result), i++);
 	}
 	return (free_tab(path), NULL);
+}
+
+void	wait_children(t_data data, pid_t p)
+{
+	int	i;
+	int	ac;
+
+	ac = data.ac - 4;
+	if (data.fd[0] == -1)
+		ac--;
+	i = 0;
+	while (i < ac)
+	{
+		if (data.pid_tab[i] != -1)
+			waitpid(data.pid_tab[i], NULL, 0);
+		i++;
+	}
+	free(data.pid_tab);
+	waitpid(p, NULL, 0);
 }

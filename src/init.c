@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 12:57:56 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/09 12:18:12 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/10 13:22:07 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,9 @@
 
 int	file_access(char *filename)
 {
-	if (access(filename, F_OK) < 0 || access(filename, R_OK) < 0 \
-	|| access(filename, W_OK) < 0)
-		return (1);
-	return (0);
+	if (access(filename, F_OK) < 0 || access(filename, R_OK) < 0)
+		return (0);
+	return (1);
 }
 
 char	**init_cmd(int ac, char **av)
@@ -46,8 +45,9 @@ int	init(int ac, char **av, char ***cmd)
 		return (error("Missing parameters.\n"), 0);
 	if (ft_strncmp(av[1], "here_doc", 8) == 0 && ac < 6)
 		return (error("Missing paramaters.\n"), 0);
-	if ((file_access(av[1]) || ft_strncmp(av[1], "here_doc", 8) == 0) \
-	&& file_access(av[ac - 1]))
+	if (ft_strncmp(av[1], "here_doc", 8) != 0 && !file_access(av[1]))
+		return (error("Missing permissions on the files given.\n"), 0);
+	if (access(av[ac - 1], F_OK) > -1 && access(av[ac - 1], W_OK) < 0)
 		return (error("Missing permissions on the files given.\n"), 0);
 	*cmd = init_cmd(ac, av + 2);
 	if (!(*cmd))

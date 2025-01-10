@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 20:01:20 by kbaridon          #+#    #+#             */
-/*   Updated: 2024/11/11 15:31:30 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/10 13:52:42 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,6 @@
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 50
 # endif
-
-typedef struct s_list
-{
-	void			*content;
-	struct s_list	*next;
-}	t_list;
 
 //libft
 char	*ft_itoa(int n);
@@ -62,17 +56,6 @@ void	ft_striteri(char *s, void (*f)(unsigned int, char *));
 char	*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 char	*ft_substr(const char *s, unsigned int start, size_t len);
 char	*ft_strnstr(const char *big, const char *little, size_t len);
-
-//libft bonus
-int		ft_lstsize(t_list *lst);
-t_list	*ft_lstlast(t_list *lst);
-t_list	*ft_lstnew(void *content);
-void	ft_lstadd_back(t_list **lst, t_list *new);
-void	ft_lstadd_front(t_list **lst, t_list *new);
-void	ft_lstiter(t_list *lst, void (*f)(void *));
-void	ft_lstclear(t_list **lst, void (*del)(void *));
-void	ft_lstdelone(t_list *lst, void (*del)(void *));
-t_list	*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
 
 //get_next_line
 char	*get_next_line(int fd);

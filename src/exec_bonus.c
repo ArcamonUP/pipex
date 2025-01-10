@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 16:33:33 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/09 14:43:35 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/10 15:53:23 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	write_lines(int fd[2], char *limiter, char **cmd)
 			get_next_line(-1);
 			close(fd[1]);
 			free_tab(cmd);
-			exit(0);
+			exit(EXIT_FAILURE);
 		}
 		write(fd[1], line, ft_strlen(line));
 		free(line);
