@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 17:23:58 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/09 15:09:38 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/10 09:17:30 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ int	do_cmd(t_data data)
 	int	y;
 
 	i = 0;
-	if (data.fd[0])
+	if (data.fd[0] == -1)
 		i = 1;
 	while (data.cmd[i + 1])
 		pre_exec(data.cmd[i++], data);
@@ -118,7 +118,7 @@ int	main(int ac, char **av, char **envp)
 	if (ft_strncmp(av[1], "here_doc", 8) == 0)
 	{
 		data.fd[1] = open(av[ac - 1], O_RDWR | O_TRUNC);
-		data.fd[0] = 0;
+		data.fd[0] = -1;
 		if (data.fd[1] == -1 || !exec_bonus(data))
 			return (end(data, 1), 1);
 	}
