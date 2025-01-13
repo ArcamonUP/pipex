@@ -6,12 +6,13 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 12:57:56 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/10 13:22:07 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/13 10:52:41 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "pipex.h"
+#include <fcntl.h>
 
 int	file_access(char *filename)
 {
@@ -39,6 +40,15 @@ char	**init_cmd(int ac, char **av)
 	return (cmd);
 }
 
+void	open_file(int ac, char **av)
+{
+	int	fd;
+
+	fd = open(av[ac - 1], O_WRONLY | O_CREAT, 0644);
+	if (fd != -1)
+		close(fd);
+}
+
 int	init(int ac, char **av, char ***cmd)
 {
 	if (ac < 5)
@@ -46,11 +56,13 @@ int	init(int ac, char **av, char ***cmd)
 	if (ft_strncmp(av[1], "here_doc", 8) == 0 && ac < 6)
 		return (error("Missing paramaters.\n"), 0);
 	if (ft_strncmp(av[1], "here_doc", 8) != 0 && !file_access(av[1]))
-		return (error("Missing permissions on the files given.\n"), 0);
+		return (open_file(ac, av), \
+		error("Missing permissions on the files given.\n"), 0);
 	if (access(av[ac - 1], F_OK) > -1 && access(av[ac - 1], W_OK) < 0)
-		return (error("Missing permissions on the files given.\n"), 0);
+		return (open_file(ac, av), \
+		error("Missing permissions on the files given.\n"), 0);
 	*cmd = init_cmd(ac, av + 2);
 	if (!(*cmd))
-		return (error("Failed to init cmd.\n"), 0);
+		return (open_file(ac, av), error("Failed to init cmd.\n"), 0);
 	return (1);
 }
