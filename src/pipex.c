@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 17:23:58 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/13 12:07:56 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/15 09:58:26 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,15 +27,13 @@ void	exec(char *cmd, t_data data, int fd[2], int i)
 	if (!path)
 	{
 		free_tab(data.cmd);
+		free(data.pid_tab);
 		if (i == 1)
-		{
-			free(data.pid_tab);
 			error("Execution failed.\n");
-		}
 		free_tab(args);
 		if (fd)
 			(close(fd[0]), close(fd[1]));
-		if (data.fd[0])
+		if (data.fd[0] != -1)
 			close(data.fd[0]);
 		close(data.fd[1]);
 		exit(EXIT_FAILURE);
