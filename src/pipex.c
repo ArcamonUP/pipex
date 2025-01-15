@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 17:23:58 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/15 09:58:26 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/15 12:13:01 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,11 @@ void	exec(char *cmd, t_data data, int fd[2], int i)
 	char	**args;
 	char	*path;
 
+	path = NULL;
 	args = ft_split(cmd, ' ');
-	path = get_path(args[0], data.envp);
-	if (!path)
+	if (args)
+		path = get_path(args[0], data.envp);
+	if (!args || !path)
 	{
 		free_tab(data.cmd);
 		free(data.pid_tab);

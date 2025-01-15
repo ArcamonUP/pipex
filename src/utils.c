@@ -6,7 +6,7 @@
 /*   By: kbaridon <kbaridon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 12:57:15 by kbaridon          #+#    #+#             */
-/*   Updated: 2025/01/13 12:03:05 by kbaridon         ###   ########.fr       */
+/*   Updated: 2025/01/15 12:08:07 by kbaridon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ char	*get_path(char *cmd, char **envp)
 		return (NULL);
 	path = ft_split(envp[i] + 5, ':');
 	i = 0;
-	while (path[i])
+	while (path && path[i])
 	{
 		temp = ft_strjoin(path[i], "/");
 		result = ft_strjoin(temp, cmd);
